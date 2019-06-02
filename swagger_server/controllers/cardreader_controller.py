@@ -14,13 +14,20 @@ def cardreader_get_card_number_get():  # noqa: E501
 	:rtype: Card
 	"""
 	try:
-		with serial.Serial('/dev/ttyUSB0', 9600, timeout=10) as ser:
-			line = ser.readline()
-
-		if line == "":
-			return "Card Not Found", 404
-		else:
-			return line
-
+		with serial.Serial('/dev/ttyUSB0', 9600, timeout=10) as ser:	# open serial port with 10 seconds timeout
+			serialInput = ser.readline().strip()						# readline and trim whitespaces/newline
+	
 	except serial.SerialException:
 		return "SerialException: Card Reader Not found", 404
+	
+	else:
+		if not serialInput:												# serial input was empty
+			return "Card Not Found", 404
+		
+		else:
+			try:
+				cardNumber = int(serialInput)							# parse to int to make sure its numeric and leading zeros cut off
+				return cardNumber
+			except ValueError:
+				return "Cardnumber was not numeric", 404
+
